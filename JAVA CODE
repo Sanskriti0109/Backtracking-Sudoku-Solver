@@ -1,0 +1,95 @@
+import java.util.Scanner;
+
+public class Sudoku {
+    final static int SIZE = 9; // The size of the grid (9x9)
+    final static int SUBGRIDSIZE = 3; // Sub-grid size (3x3)
+
+    public static void main(String[] args) {
+        int[][] board = new int[SIZE][SIZE]; // Initialize the board
+
+        // Ask the user for the Sudoku puzzle
+        System.out.println("Enter the Sudoku puzzle (use 0 for empty cells):");
+        readBoard(board);
+
+        if (solve(board)) {
+            System.out.println("Solved:");
+            print(board);
+        } else {
+            System.out.println("Unsolvable");
+        }
+    }
+
+    // Method to read the board from the user
+    private static void readBoard(int[][] board) {
+        Scanner scanner = new Scanner(System.in);
+        
+        // Loop through each row
+        for (int i = 0; i < SIZE; i++) {
+            System.out.println("Enter row " + (i + 1) + " (separate numbers with spaces):");
+            for (int j = 0; j < SIZE; j++) {
+                // Read each number from the input
+                board[i][j] = scanner.nextInt();
+            }
+        }
+    }
+
+    // Print the Sudoku board
+    private static void print(int[][] board) {
+        for (int i = 0; i < SIZE; i++) {
+            if (i % SUBGRIDSIZE == 0 && i != 0) System.out.println("-------------------------");
+            for (int j = 0; j < SIZE; j++) {
+                if (j % SUBGRIDSIZE == 0 && j != 0) System.out.print(" | ");
+                System.out.print(board[i][j] == 0 ? " " : board[i][j]);
+                System.out.print(" ");
+            }
+            System.out.println();
+        }
+    }
+
+    // Check if it's valid to place `num` at (row, col)
+    private static boolean isValid(int[][] board, int row, int col, int num) {
+        // Check the row
+        for (int c = 0; c < SIZE; c++) {
+            if (board[row][c] == num) return false;
+        }
+
+        // Check the column
+        for (int r = 0; r < SIZE; r++) {
+            if (board[r][col] == num) return false;
+        }
+
+        // Check the 3x3 subgrid
+        int startRow = row - row % SUBGRIDSIZE;
+        int startCol = col - col % SUBGRIDSIZE;
+        for (int r = 0; r < SUBGRIDSIZE; r++) {
+            for (int c = 0; c < SUBGRIDSIZE; c++) {
+                if (board[startRow + r][startCol + c] == num) return false;
+            }
+        }
+
+        return true;
+    }
+
+    // Solve the Sudoku puzzle using backtracking
+    private static boolean solve(int[][] board) {
+        for (int row = 0; row < SIZE; row++) {
+            for (int col = 0; col < SIZE; col++) {
+                if (board[row][col] == 0) { // Empty space found
+                    for (int num = 1; num <= SIZE; num++) { // Try numbers 1 to 9
+                        if (isValid(board, row, col, num)) {
+                            board[row][col] = num; // Assign the number
+
+                            if (solve(board)) { // Recursively try to solve
+                                return true;
+                            }
+
+                            board[row][col] = 0; // Backtrack if no solution found
+                        }
+                    }
+                    return false; // No valid number can be placed, backtrack
+                }
+            }
+        }
+        return true; // All cells are filled correctly
+    }
+}
